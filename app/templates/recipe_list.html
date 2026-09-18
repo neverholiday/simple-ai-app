@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block title %}Recipes{% endblock %}
+{% block content %}
+<div class="heading">
+  <h1>Recipes</h1>
+  <div class="actions">
+    <a class="button" href="/recipes/new">New recipe</a>
+    <a class="button button-secondary" href="/extract">Extract from text</a>
+  </div>
+</div>
+
+{% if recipes %}
+<table class="table">
+  <thead>
+    <tr><th>Name</th><th>Ingredients</th><th>Prep time</th><th>Updated</th></tr>
+  </thead>
+  <tbody>
+    {% for recipe in recipes %}
+    <tr>
+      <td><a href="/recipes/{{ recipe.id }}">{{ recipe.name }}</a></td>
+      <td>{{ recipe.ingredients|length }}</td>
+      <td>{% if recipe.prep_time_minutes is not none %}{{ recipe.prep_time_minutes }} min{% else %}-{% endif %}</td>
+      <td>{{ recipe.updated_at }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">No recipes yet. Type one in, or extract one from text.</p>
+{% endif %}
+{% endblock %}

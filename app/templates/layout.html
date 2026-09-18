@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Recipes{% endblock %} - Simple AI App</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <nav>
+      <a href="/recipes" class="brand">Simple AI App</a>
+      <a href="/recipes">Recipes</a>
+      <a href="/recipes/new">New recipe</a>
+      <a href="/extract">Extract from text</a>
+      <a href="/demo">Demo Switches</a>
+    </nav>
+    <div class="status">
+      <span class="pill">Gaps: {{ gaps_name }}</span>
+      {% for name in switches.active() %}
+        <span class="pill pill-warn">{{ name|capitalize }} on</span>
+      {% endfor %}
+    </div>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

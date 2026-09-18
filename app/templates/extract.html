@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block title %}Extract from text{% endblock %}
+{% block content %}
+<h1>Extract a recipe from text</h1>
+<p class="meta">Paste a messy recipe. The model suggests a Draft; nothing is saved until you review it.</p>
+
+{% if samples %}
+<form method="get" action="/extract" class="sample-picker">
+  <label>
+    <span>Load a Sample</span>
+    <select name="sample">
+      <option value="">Choose a Sample</option>
+      {% for name in samples %}
+      <option value="{{ name }}" {% if name == selected %}selected{% endif %}>{{ name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button type="submit" class="button button-secondary">Load</button>
+</form>
+{% endif %}
+
+<form method="post" action="/extract" data-busy>
+  {% if empty %}<div class="notice notice-warn">Paste some Recipe Text first.</div>{% endif %}
+  <label class="field">
+    <span>Recipe Text</span>
+    <textarea name="recipe_text" rows="14">{{ recipe_text }}</textarea>
+  </label>
+  <div class="actions">
+    <button type="submit" class="button">Extract</button>
+    <span class="busy" hidden>Asking the model... <span data-seconds>0</span>s</span>
+  </div>
+</form>
+{% endblock %}

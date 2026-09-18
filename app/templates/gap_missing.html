@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block title %}Gap not written yet{% endblock %}
+{% block content %}
+<h1>This Gap is not written yet</h1>
+<div class="notice notice-warn"><strong>{{ message }}</strong></div>
+<p>Open <code>starter/extraction.py</code> and write the function. Check it with:</p>
+<pre class="command">uv run pytest tests/test_gap1_validate.py tests/test_gap2_extract.py tests/test_gap3_fallback.py</pre>
+<p>Recipes typed in by hand still work: <a href="/recipes/new">New recipe</a>.</p>
+{% endblock %}

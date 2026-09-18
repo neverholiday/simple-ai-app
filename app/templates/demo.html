@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block title %}Demo Switches{% endblock %}
+{% block content %}
+<h1>Demo Switches</h1>
+<p class="meta">Force a model behaviour on demand. Changes apply to the next Extraction.</p>
+
+<dl class="facts">
+  <dt>Model</dt><dd>{{ model }}</dd>
+  <dt>API key</dt><dd>{% if key_configured %}configured{% else %}<strong>not configured</strong> - every Extraction ends in a Fallback{% endif %}</dd>
+  <dt>Gaps</dt><dd>{{ gaps_name }}</dd>
+</dl>
+
+<form method="post" action="/demo" class="switches">
+  <label class="switch">
+    <input type="checkbox" name="slow" {% if switches.slow %}checked{% endif %}>
+    <span><strong>Slow</strong> - the model waits {{ '%g' % slow_seconds }} seconds before answering.</span>
+  </label>
+  <label class="switch">
+    <input type="checkbox" name="hang" {% if switches.hang %}checked{% endif %}>
+    <span><strong>Hang</strong> - the model never answers. Only a timeout ends the wait.</span>
+  </label>
+  <label class="switch">
+    <input type="checkbox" name="error" {% if switches.error %}checked{% endif %}>
+    <span><strong>Error</strong> - the model service fails with a server error.</span>
+  </label>
+  <div class="actions">
+    <button type="submit" class="button">Save switches</button>
+  </div>
+</form>
+{% endblock %}

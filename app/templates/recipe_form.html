@@ -1,0 +1,93 @@
+{% extends "layout.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<h1>{{ title }}</h1>
+
+{% if mode == "review" %}
+<div class="notice notice-info">
+  <strong>Draft from the model.</strong> Nothing is saved yet. Check every value against the Recipe Text, then save.
+</div>
+{% elif mode == "rejected" %}
+<div class="notice notice-warn">
+  <strong>Rejected Draft.</strong> The model answered, but some values break the recipe rules. They are marked below. Fix them, then save.
+</div>
+{% elif mode == "fallback" %}
+<div class="notice notice-error">
+  <strong>Fallback: the model gave no Draft.</strong> {{ reason }} Your text is kept, so you can fill in the recipe by hand.
+</div>
+{% endif %}
+
+{% if errors and mode in ("manual", "edit") %}
+<div class="notice notice-warn">Some values need fixing before this recipe can be saved.</div>
+{% endif %}
+
+<div class="{% if recipe_text %}review-layout{% endif %}">
+  {% if recipe_text %}
+  <aside class="recipe-text">
+    <h2>Recipe Text</h2>
+    <pre>{{ recipe_text }}</pre>
+  </aside>
+  {% endif %}
+
+  <form method="post" action="{{ action }}" class="recipe-form">
+    <input type="hidden" name="mode" value="{{ mode }}">
+    {% if recipe_text %}<input type="hidden" name="recipe_text" value="{{ recipe_text }}">{% endif %}
+
+    <label class="field {% if errors.name %}has-error{% endif %}">
+      <span>Recipe name</span>
+      <input type="text" name="name" value="{{ values.name }}">
+      {% if errors.name %}<small class="error">{{ errors.name }}</small>{% endif %}
+    </label>
+
+    <label class="field {% if errors.prep_time_minutes %}has-error{% endif %}">
+      <span>Prep time (minutes, optional)</span>
+      <input type="text" inputmode="numeric" name="prep_time_minutes" value="{{ values.prep_time_minutes }}">
+      {% if errors.prep_time_minutes %}<small class="error">{{ errors.prep_time_minutes }}</small>{% endif %}
+    </label>
+
+    <fieldset class="ingredients">
+      <legend>Ingredients</legend>
+      {% if errors.ingredients %}<small class="error">{{ errors.ingredients }}</small>{% endif %}
+      <div class="ingredient-row ingredient-head">
+        <span>Name</span><span>Amount</span><span>Unit</span>
+      </div>
+      {% for row in values.rows %}
+      {% set i = loop.index0 %}
+      {% set name_error = errors['ingredients[%d].name' % i] %}
+      {% set amount_error = errors['ingredients[%d].amount' % i] %}
+      {% set unit_error = errors['ingredients[%d].unit' % i] %}
+      <div class="ingredient-row">
+        <div class="{% if name_error %}has-error{% endif %}">
+          <input type="text" name="ingredient_name" value="{{ row.name }}" aria-label="Ingredient {{ i + 1 }} name">
+          {% if name_error %}<small class="error">{{ name_error }}</small>{% endif %}
+        </div>
+        <div class="{% if amount_error %}has-error{% endif %}">
+          <input type="text" inputmode="decimal" name="ingredient_amount" value="{{ row.amount }}" placeholder="{% if row.unit == to_taste %}none{% endif %}" aria-label="Ingredient {{ i + 1 }} amount">
+          {% if amount_error %}<small class="error">{{ amount_error }}</small>{% endif %}
+        </div>
+        <div class="{% if unit_error %}has-error{% endif %}">
+          <select name="ingredient_unit" aria-label="Ingredient {{ i + 1 }} unit">
+            <option value="">Choose a Unit</option>
+            {% set ns = namespace(known=false) %}
+            {% for unit_name, unit_label in units %}
+              {% if unit_name == row.unit %}{% set ns.known = true %}{% endif %}
+              <option value="{{ unit_name }}" {% if unit_name == row.unit %}selected{% endif %}>{{ unit_name }} ({{ unit_label }})</option>
+            {% endfor %}
+            {% if row.unit and not ns.known %}
+              <option value="{{ row.unit }}" selected>{{ row.unit }} (not allowed)</option>
+            {% endif %}
+          </select>
+          {% if unit_error %}<small class="error">{{ unit_error }}</small>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+      <p class="hint">Empty rows are ignored. Use {{ to_taste }} with no Amount for "to taste".</p>
+    </fieldset>
+
+    <div class="actions">
+      <button type="submit" class="button">Save recipe</button>
+      <a class="button button-secondary" href="/recipes">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block title %}{{ recipe.name }}{% endblock %}
+{% block content %}
+<div class="heading">
+  <h1>{{ recipe.name }}</h1>
+  <div class="actions">
+    <a class="button" href="/recipes/{{ recipe.id }}/edit">Edit</a>
+    <form method="post" action="/recipes/{{ recipe.id }}/delete">
+      <button type="submit" class="button button-danger">Delete</button>
+    </form>
+  </div>
+</div>
+
+<p class="meta">
+  Prep time: {% if recipe.prep_time_minutes is not none %}{{ recipe.prep_time_minutes }} minutes{% else %}not given{% endif %}
+</p>
+
+<table class="table">
+  <thead><tr><th>Ingredient</th><th>Amount</th><th>Unit</th></tr></thead>
+  <tbody>
+    {% for ing in recipe.ingredients %}
+    <tr>
+      <td>{{ ing.name }}</td>
+      <td>{% if ing.amount is not none %}{{ '%g' % ing.amount }}{% else %}-{% endif %}</td>
+      <td>{{ ing.unit }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
