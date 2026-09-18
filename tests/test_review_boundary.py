@@ -1,11 +1,13 @@
 """The web flow: a Draft only fills the form; nothing is saved until Review submits it."""
 
+import time
+
 from app import db
 from app.drafts import DraftIngredient
 from app.gaps import load_gaps
 from app.main import create_app
 from app.provider import ProviderServerError
-from tests.fakes import FakeProvider, make_draft
+from tests.fakes import HANG, FakeProvider, make_draft
 
 TEXT = "น้ำพริกกะปิ กะปิ 1 ช้อนโต๊ะ"
 
@@ -131,6 +133,31 @@ def test_demo_switches_page_updates_live(make_client):
     client.post("/demo", data={})
     response = client.post("/extract", data={"recipe_text": TEXT})
     assert "Draft from the model" in response.text
+
+
+def test_bad_unit_switch_forces_a_rejected_draft(make_client, settings):
+    client = make_client(provider=FakeProvider(make_draft()))
+    client.post("/demo", data={"bad_unit": "on"})
+    response = client.post("/extract", data={"recipe_text": TEXT})
+    assert "Rejected Draft" in response.text
+    assert "is not an allowed Unit" in response.text
+    assert recipe_count(settings) == 0
+
+
+def test_timeout_from_the_demo_page_is_used(make_client):
+    client = make_client(provider=FakeProvider(HANG))
+    client.post("/demo", data={"timeout": "0.05"})  # clamped up to the 1s minimum
+    started = time.monotonic()
+    response = client.post("/extract", data={"recipe_text": TEXT})
+    assert "Fallback" in response.text
+    assert "1 seconds" in response.text
+    assert time.monotonic() - started < 8, "the page timeout must replace the 20s default"
+
+
+def test_demo_page_rejects_a_silly_timeout(make_client):
+    client = make_client()
+    client.post("/demo", data={"timeout": "not a number"})
+    assert 'value="20"' in client.get("/demo").text
 
 
 def test_sample_loads_into_the_textarea(make_client):

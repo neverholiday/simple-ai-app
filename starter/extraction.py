@@ -45,7 +45,7 @@ async def extract(
     provider: Provider,
     units: Collection[str],
     *,
-    timeout: float = 6.0,
+    timeout: float = 20.0,
     attempts: int = 2,
     backoff: float = 0.5,
 ) -> Draft | RejectedDraft:
@@ -72,7 +72,7 @@ async def extract_or_fallback(
     provider: Provider,
     units: Collection[str],
     *,
-    timeout: float = 6.0,
+    timeout: float = 20.0,
     attempts: int = 2,
     backoff: float = 0.5,
 ) -> Draft | RejectedDraft | Fallback:

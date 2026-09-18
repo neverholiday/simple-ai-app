@@ -3,8 +3,9 @@ import time
 
 import pytest
 
-from app.demo import DemoProvider, DemoSwitches
+from app.demo import INVENTED_UNIT, DemoProvider, DemoSwitches
 from app.provider import ProviderServerError
+from app.units import UNIT_NAMES
 from tests.fakes import FakeProvider, make_draft
 
 
@@ -42,3 +43,23 @@ async def test_switches_are_read_on_every_call():
     switches.error = True
     with pytest.raises(ProviderServerError):
         await provider.extract("text")
+
+
+async def test_bad_unit_switch_replaces_the_first_unit():
+    provider = DemoProvider(FakeProvider(make_draft()), DemoSwitches(bad_unit=True))
+    draft = await provider.extract("text")
+    assert draft.ingredients[0].unit == INVENTED_UNIT
+    assert draft.ingredients[0].unit not in UNIT_NAMES
+    assert draft.ingredients[1].unit == "เม็ด", "only the first Unit changes"
+
+
+async def test_bad_unit_switch_leaves_the_original_draft_alone():
+    original = make_draft()
+    provider = DemoProvider(FakeProvider(original), DemoSwitches(bad_unit=True))
+    await provider.extract("text")
+    assert original.ingredients[0].unit == "ช้อนโต๊ะ"
+
+
+def test_active_lists_readable_names():
+    assert DemoSwitches(slow=True, bad_unit=True).active() == ["Slow", "Bad Unit"]
+    assert DemoSwitches().active() == []

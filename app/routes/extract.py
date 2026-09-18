@@ -47,7 +47,12 @@ async def run_extraction(request: Request):
 
     gaps = request.app.state.gaps
     try:
-        result = await gaps.extract_or_fallback(recipe_text, request.app.state.provider, UNIT_NAMES)
+        result = await gaps.extract_or_fallback(
+            recipe_text,
+            request.app.state.provider,
+            UNIT_NAMES,
+            timeout=request.app.state.switches.timeout,
+        )
     except NotImplementedError as exc:
         return render(request, "gap_missing.html", {"message": str(exc)}, status_code=501)
 

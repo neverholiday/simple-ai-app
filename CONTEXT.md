@@ -65,7 +65,7 @@ _Avoid_: Error page, retry screen
 ### Running the demo
 
 **Demo Switch**:
-A control that forces one model behaviour on demand, so a failure appears the same way every time even though the real model is used. The switches are **Slow**, **Hang** and **Error**. A **Rejected Draft** is shown with a **Sample** instead of a switch.
+A control that forces one model behaviour on demand, so a failure appears the same way every time even though the real model is used. The switches are **Slow**, **Hang**, **Error** and **Bad Unit** (which makes any **Draft** a **Rejected Draft**). The per-attempt timeout is set here too.
 _Avoid_: Feature flag, toggle, debug mode
 
 **Provider**:
@@ -108,3 +108,4 @@ _Avoid_: Answer key, reference, finished app
 - A model that writes "1 tsp" where the **Recipe Text** said "ตามชอบ" produces a valid **Draft** that is still wrong. Only **Review** can catch this.
 - "A pinch" and เล็กน้อย could have been their own **Units**. Resolved: both are **To Taste**.
 - An early design had a **Mock** provider inside the app. Resolved: there is no **Mock**; every **Extraction** uses the real model, and **Demo Switches** force failures.
+- Live runs showed the model often turns an unknown unit into an allowed one, so a **Sample** alone cannot be relied on to produce a **Rejected Draft**. The **Bad Unit** switch exists for that.

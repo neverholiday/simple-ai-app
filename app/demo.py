@@ -6,7 +6,10 @@ from dataclasses import dataclass
 from app.drafts import Draft
 from app.provider import Provider, ProviderServerError
 
-SLOW_SECONDS = 4.0
+SLOW_SECONDS = 8.0
+DEFAULT_TIMEOUT = 20.0
+# Not in the Unit list, so a Draft carrying it is always rejected.
+INVENTED_UNIT = "ทัพพี"
 
 
 @dataclass
@@ -14,9 +17,13 @@ class DemoSwitches:
     slow: bool = False
     hang: bool = False
     error: bool = False
+    bad_unit: bool = False
+    # Shortening this makes the Hang demo end sooner; 20s is above a normal answer.
+    timeout: float = DEFAULT_TIMEOUT
 
     def active(self) -> list[str]:
-        return [name for name in ("slow", "hang", "error") if getattr(self, name)]
+        names = {"slow": "Slow", "hang": "Hang", "error": "Error", "bad_unit": "Bad Unit"}
+        return [label for name, label in names.items() if getattr(self, name)]
 
 
 class DemoProvider:
@@ -34,4 +41,9 @@ class DemoProvider:
             await asyncio.Event().wait()  # never set: the call never answers
         if self.switches.slow:
             await asyncio.sleep(self.slow_seconds)
-        return await self.inner.extract(recipe_text)
+        draft = await self.inner.extract(recipe_text)
+        if self.switches.bad_unit and draft.ingredients:
+            # The model answered; its first Unit is replaced with one that cannot be saved.
+            draft = draft.model_copy(deep=True)
+            draft.ingredients[0].unit = INVENTED_UNIT
+        return draft

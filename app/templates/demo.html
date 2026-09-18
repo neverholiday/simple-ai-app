@@ -23,6 +23,17 @@
     <input type="checkbox" name="error" {% if switches.error %}checked{% endif %}>
     <span><strong>Error</strong> - the model service fails with a server error.</span>
   </label>
+  <label class="switch">
+    <input type="checkbox" name="bad_unit" {% if switches.bad_unit %}checked{% endif %}>
+    <span><strong>Bad Unit</strong> - the model answers, then its first Unit is replaced with one that is not allowed, so the Draft is always rejected.</span>
+  </label>
+
+  <label class="field timeout-field">
+    <span>Timeout for each attempt, in seconds ({{ '%g' % default_timeout }} by default, 2 attempts)</span>
+    <input type="text" inputmode="decimal" name="timeout" value="{{ '%g' % switches.timeout }}">
+    <small class="hint">A real answer takes about 7 seconds. Set this to 5 before showing Hang, so the wait is about 10 seconds instead of 40.</small>
+  </label>
+
   <div class="actions">
     <button type="submit" class="button">Save switches</button>
   </div>
